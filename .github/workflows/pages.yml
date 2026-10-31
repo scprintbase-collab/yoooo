@@ -2,7 +2,7 @@ name: Publish website preview
 on:
   push:
     branches: [main]
-    paths: [.github/workflows/pages.yml]
+    paths: [.github/workflows/pages.yml, 'print-bureau/**']
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,14 +20,22 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout verified Trafaretnaya Baza preview
+      - name: Checkout existing published website
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           ref: ca2e8b44ca931ff1e801ca51650f6b7a33737ee2
+          path: published
+      - name: Checkout new one-page website
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          path: source
+          sparse-checkout: print-bureau
+      - name: Add new website at separate address
+        run: cp -R source/print-bureau published/print-bureau
       - name: Upload static website
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
         with:
-          path: .
+          path: published
       - name: Publish preview
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346
